@@ -5,12 +5,19 @@ echo   Auto Setup Script
 echo ============================================
 echo.
 
-:: ── Step 1: Ask for MySQL password ──
+:: Step 1: Ask for MySQL password
 set /p MYSQL_PASS=Enter your MySQL root password: 
 
-:: ── Step 2: Setup Database ──
+:: Step 2: Encode @ symbol in password for database URL
+set ENCODED_PASS=%MYSQL_PASS:@=%40%
+
+:: Step 3: Drop old database if exists
 echo.
-echo [1/4] Setting up database...
+echo [1/5] Cleaning old database if exists...
+mysql -u root -p%MYSQL_PASS% -e "DROP DATABASE IF EXISTS scms_db;"
+
+:: Step 4: Setup Database
+echo [2/5] Setting up database...
 mysql -u root -p%MYSQL_PASS% < backend\schema.sql
 if %errorlevel% neq 0 (
     echo ERROR: Database setup failed! Check your MySQL password.
@@ -19,11 +26,11 @@ if %errorlevel% neq 0 (
 )
 echo Database setup SUCCESS!
 
-:: ── Step 3: Create .env file ──
+:: Step 5: Create .env file with encoded password
 echo.
-echo [2/4] Creating .env file...
+echo [3/5] Creating .env file...
 (
-echo DATABASE_URL=mysql+pymysql://root:%MYSQL_PASS%@localhost:3306/scms_db
+echo DATABASE_URL=mysql+pymysql://root:%ENCODED_PASS%@localhost:3306/scms_db
 echo SECRET_KEY=your-ultra-secret-key-change-in-production-abc123xyz
 echo ALGORITHM=HS256
 echo ACCESS_TOKEN_EXPIRE_MINUTES=480
@@ -31,9 +38,9 @@ echo CORS_ORIGINS=http://localhost:3000,http://localhost:5173
 ) > backend\.env
 echo .env file created SUCCESS!
 
-:: ── Step 4: Setup Python Backend ──
+:: Step 6: Setup Python Backend
 echo.
-echo [3/4] Setting up Python backend...
+echo [4/5] Setting up Python backend...
 cd backend
 python -m venv venv
 call venv\Scripts\activate
@@ -41,15 +48,14 @@ pip install -r requirements.txt
 cd ..
 echo Backend setup SUCCESS!
 
-:: ── Step 5: Setup Frontend ──
+:: Step 7: Setup Frontend
 echo.
-echo [4/4] Setting up frontend...
+echo [5/5] Setting up frontend...
 cd frontend
 npm install
 cd ..
 echo Frontend setup SUCCESS!
 
-:: ── Done ──
 echo.
 echo ============================================
 echo   Setup Complete!
