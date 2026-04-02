@@ -150,10 +150,21 @@ CREATE TABLE marks (
     INDEX idx_marks_exam (exam_id)
 ) ENGINE=InnoDB;
 
--- ✅ CORRECT PASSWORD HASH for Admin@123 using bcrypt_sha256
--- This matches the security.py CryptContext(schemes=["bcrypt_sha256"])
+-- ============================================
+-- DEFAULT USERS
+-- ============================================
+
+-- Admin user | Password: Admin@123
 INSERT INTO users (email, password_hash, role)
 VALUES ('admin@scms.edu', '$bcrypt-sha256$v=2,t=2b,r=12$Z6B7Bd4JuNhAFLNksjcAuO$CMHSjlGIEJdsWqG6ONNDzsyZC6AG6Ym', 'admin');
+
+-- Faculty user | Password: Faculty@123
+INSERT INTO users (email, password_hash, role)
+VALUES ('faculty@scms.edu', '$bcrypt-sha256$v=2,t=2b,r=12$VN29XmAp0vTgZQb/Y4FGuO$HEhoAj2OlbYF9jt2vSHDlM1qF6EX3/q', 'faculty');
+
+-- ============================================
+-- DEFAULT DEPARTMENTS
+-- ============================================
 
 INSERT INTO departments (name, code) VALUES
 ('Computer Science', 'CS'),
@@ -161,3 +172,10 @@ INSERT INTO departments (name, code) VALUES
 ('Mechanical Engineering', 'ME'),
 ('Civil Engineering', 'CE'),
 ('Mathematics', 'MATH');
+
+-- ============================================
+-- DEFAULT FACULTY PROFILE (linked to faculty@scms.edu)
+-- ============================================
+
+INSERT INTO faculty (user_id, first_name, last_name, employee_id, department_id, designation)
+VALUES (2, 'Demo', 'Faculty', 'FAC001', 1, 'Assistant Professor');
